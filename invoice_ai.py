@@ -3,7 +3,7 @@ import json
 import re
 from datetime import date, timedelta
 
-client = anthropic.Anthropic()
+# client initialized inside functions
 
 def parse_invoice_description(description: str, freelancer_name: str = "", client_name: str = "") -> dict:
     today = date.today()
