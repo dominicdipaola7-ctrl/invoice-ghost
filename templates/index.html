@@ -369,7 +369,7 @@ h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif}
   }
 
   async function startCheckout() {
-    const res = await fetch('/create-checkout', {method:'POST'});
+    const res = await fetch('/checkout', {method:'POST'});
     const d = await res.json();
     if (d.url) window.location.href = d.url;
     else alert('Could not start checkout. Please try again.');
