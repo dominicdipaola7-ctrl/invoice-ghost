@@ -369,7 +369,13 @@ h1,h2,h3,.serif{font-family:'Cormorant Garamond',serif}
   }
 
   async function startCheckout() {
-    const res = await fetch('/checkout', {method:'POST'});
+  try {
+    const res = await fetch('/checkout', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:''})});
+    const d = await res.json();
+    if (d.url) { window.location.href = d.url; return; }
+    alert('Checkout error: ' + (d.error || 'unknown'));
+  } catch(e) { alert('Could not connect. Please try again.'); }
+});
     const d = await res.json();
     if (d.url) window.location.href = d.url;
     else alert('Could not start checkout. Please try again.');
