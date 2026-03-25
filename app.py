@@ -20,7 +20,7 @@ def is_pro(): return session.get("pro", False)
 
 @app.route("/")
 def index():
-    return render_template("index.html", usage=get_usage(), pro=is_pro(), free_limit=FREE_LIMIT)
+    return render_template("index.html", usage=get_usage(), pro=is_pro(), free_limit=FREE_LIMIT, stripe_key=os.environ.get("STRIPE_SECRET_KEY",""), upgraded=request.args.get("upgrade")=="success")
 
 @app.route("/generate", methods=["POST"])
 @limiter.limit("20 per hour")
