@@ -10,7 +10,7 @@ import io
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-change-me')
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY', '')
+# stripe.api_key set inside routes
 
 limiter = Limiter(get_remote_address, app=app, default_limits=[], storage_uri="memory://")
 
