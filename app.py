@@ -29,8 +29,8 @@ def is_pro():
 @app.route('/')
 def index():
     return render_template('index.html',
-        stripe_key=os.getenv('STRIPE_PUBLISHABLE_KEY', ''),
-        price_id=os.getenv('STRIPE_PRO_PRICE_ID', ''),
+        stripe_key=os.getenv('STRIPE_SECRET_KEY', ''),
+        price_id=os.getenv('STRIPE_PRICE_ID', ''),
         usage=get_usage(), pro=is_pro(), free_limit=FREE_LIMIT)
 
 @app.route('/generate', methods=['POST'])
@@ -85,7 +85,7 @@ def create_checkout():
         session_obj = stripe.checkout.Session.create(
             payment_method_types=['card'],
             mode='subscription',
-            line_items=[{'price': os.getenv('STRIPE_PRO_PRICE_ID'), 'quantity': 1}],
+            line_items=[{'price': os.getenv('STRIPE_PRICE_ID'), 'quantity': 1}],
             success_url=f"{base}/success?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{base}/",
         )
@@ -104,8 +104,8 @@ def success():
         except Exception:
             pass
     return render_template('index.html',
-        stripe_key=os.getenv('STRIPE_PUBLISHABLE_KEY', ''),
-        price_id=os.getenv('STRIPE_PRO_PRICE_ID', ''),
+        stripe_key=os.getenv('STRIPE_SECRET_KEY', ''),
+        price_id=os.getenv('STRIPE_PRICE_ID', ''),
         usage=get_usage(), pro=True, free_limit=FREE_LIMIT, upgraded=True)
 
 @app.route('/webhook', methods=['POST'])
@@ -126,3 +126,27 @@ def status():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/checkout', methods=['POST'])
+def checkout():
+    import stripe
+    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+    price_id = os.environ.get('STRIPE_PRICE_ID')
+    domain = os.environ.get('DOMAIN', 'http://localhost:5000')
+    try:
+        data = request.get_json() or {}
+        email = data.get('email', '')
+        params = {
+            'mode': 'subscription',
+            'line_items': [{'price': price_id, 'quantity': 1}],
+            'success_url': f'{domain}/?upgrade=success',
+            'cancel_url': f'{domain}/?upgrade=cancelled',
+            'allow_promotion_codes': True,
+        }
+        if email:
+            params['customer_email'] = email
+        checkout_session = stripe.checkout.Session.create(**params)
+        return jsonify({'url': checkout_session.url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
