@@ -1,3 +1,4 @@
+import os
 import anthropic
 import json
 import re
@@ -6,6 +7,8 @@ from datetime import date, timedelta
 # client initialized inside functions
 
 def parse_invoice_description(description: str, freelancer_name: str = "", client_name: str = "") -> dict:
+    import anthropic
+    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
     today = date.today()
     due_date = today + timedelta(days=30)
 
